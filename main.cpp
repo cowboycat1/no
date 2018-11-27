@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <fstream>
 #include "SDL_Plotter.h"
@@ -9,12 +10,15 @@
 #include "Level.h"
 #include "DrawingFunctions.h"
 #include "Block.h"
+#include "WaveAnimation.h"
+#include <cstdlib>
 
 using namespace std;
 
+
 int main(int argc, char ** argv)
 {
-    char key_pressed;
+char key_pressed;
 
     const int screenWidth = 800, screenHeight = 400;
     SDL_Plotter p(screenHeight, screenWidth);
@@ -67,6 +71,7 @@ int main(int argc, char ** argv)
     bottomRightPipe.setLocation(800 - bottomRightPipe.getScaledWidth(0),
                                 bottomLeftPipe.get_y());
 
+
     int square_x = 395,square_y = 150;
     CollisionBox test(20,20,square_x,square_y);
     bool jumping = false, hit_max_jump = false;
@@ -79,8 +84,12 @@ int main(int argc, char ** argv)
                  bottom_left_pipe (65,64,0,306), bottom_right_pipe (65,64,735,306);
 
     while (!p.getQuit()){
+      
+        WaveAnimation wa(0, 50);
+        wa.setSpeed_1sthalf(0.2);
+        wa.setSpeed_2ndhalf(0.2);
 
-
+        vector<WaveAnimation> wAnimations;
         if (p.kbhit()){
             switch(p.getKey()){
             }
@@ -274,6 +283,23 @@ int main(int argc, char ** argv)
         bottomRightPipe.draw(p);
 
         horizontalTile(brickFloor, 0, screenWidth, p);
+
+        wa.setNextFrame(level1.getPlatform(0).getColLocations());
+
+        for (int w = 0; w < wAnimations.size(); w++){
+
+            WaveAnimation& wa = wAnimations[w];
+
+            if (wa.finished()){
+                wAnimations.erase(wAnimations.begin() + w);
+                continue;
+            }
+
+            Platform& p = level1.getPlatform(wa.platformNum());
+
+            wa.setNextFrame(p.getColLocations());
+
+        }
 
         level1.draw(p);
 
